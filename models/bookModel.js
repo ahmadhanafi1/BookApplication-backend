@@ -6,11 +6,11 @@ const slugify = require('slugify');
 const bookSchema = new mongoose.Schema({
 	name: {
     type: String,
-    required: [true, 'A tour must have a name'],
+    required: [true, 'A book must have a name'],
     unique: true,
     trim: true,
-    maxlength: [40, 'A tour name must have less or equal then 40 characters'],
-    minlength: [10, 'A tour name must have more or equal then 10 characters']
+    maxlength: [40, 'A book name must have less or equal then 40 characters'],
+    minlength: [10, 'A book name must have more or equal then 10 characters']
 	},
 	slug: String,
 	author: {
@@ -42,7 +42,7 @@ const bookSchema = new mongoose.Schema({
   },
   imageCover: {
     type: String,
-    required: [true, 'A tour must have a cover image']
+    required: [true, 'A book must have a cover image']
   },
   createdAt: {
     type: Date,
@@ -50,7 +50,7 @@ const bookSchema = new mongoose.Schema({
     select: false
   },
   startDates: [Date],
-  secretTour: {
+  secretBook: {
     type: Boolean,
     default: false
   }

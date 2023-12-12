@@ -10,9 +10,6 @@ router
   .route('/top-5-cheap')
   .get(bookController.aliasTopBooks, bookController.getAllBooks);
 
-router.route('/book-stats').get(bookController.getBookStats);
-router.route('/monthly-plan/:year').get(bookController.getMonthlyPlan);
-
 router
   .route('/')
   .get(authController.protect, bookController.getAllBooks)

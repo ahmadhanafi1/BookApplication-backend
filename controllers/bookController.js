@@ -11,7 +11,7 @@ exports.aliasTopBooks = (req, res, next) => {
 };
 
 exports.getAllBooks = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query)
+  const features = new APIFeatures(Book.find(), req.query)
     .filter()
     .sort()
     .limitFields()
@@ -50,7 +50,7 @@ exports.createBook = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
-      tour: newBook
+      book: newBook
     }
   });
 });
