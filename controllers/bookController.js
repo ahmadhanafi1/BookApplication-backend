@@ -30,7 +30,7 @@ exports.getAllBooks = catchAsync(async (req, res, next) => {
 
 exports.getBook = catchAsync(async (req, res, next) => {
   const book = await Book.findById(req.params.id);
-  // Book.findOne({ _id: req.params.id })
+
 
   if (!book) {
     return next(new AppError('No book found with that ID', 404));
