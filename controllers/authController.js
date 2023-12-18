@@ -66,13 +66,14 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
+  console.log(req.headers)
   // 1) Getting token and check of it's there
   let token;
   if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
+    req.headers.token &&
+    req.headers.token.startsWith('Bearer')
   ) {
-    token = req.headers.authorization.split(' ')[1];
+    token = req.headers.token.split(' ')[1];
   }
 
   if (!token) {
