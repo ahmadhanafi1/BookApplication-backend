@@ -74,7 +74,7 @@ exports.updateBook = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteBook = catchAsync(async (req, res, next) => {
-  const book = await Book``.findByIdAndDelete(req.params.id);
+  const book = await Book.findByIdAndDelete(req.params.id);
 
   if (!book) {
     return next(new AppError('No book found with that ID', 404));

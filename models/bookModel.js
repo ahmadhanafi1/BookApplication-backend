@@ -42,7 +42,7 @@ const bookSchema = new mongoose.Schema({
   },
   imageCover: {
     type: String,
-    required: [true, 'A book must have a cover image']
+    // required: [true, 'A book must have a cover image']
   },
   createdAt: {
     type: Date,
