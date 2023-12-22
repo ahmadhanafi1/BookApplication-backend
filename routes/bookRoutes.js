@@ -20,8 +20,8 @@ router
   .get(bookController.getBook)
   .patch(bookController.updateBook)
   .delete(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide'),
+    // authController.protect,
+    // authController.restrictTo('admin'),
     bookController.deleteBook
   );
 
