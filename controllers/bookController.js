@@ -46,7 +46,6 @@ exports.getBook = catchAsync(async (req, res, next) => {
 
 exports.createBook = catchAsync(async (req, res, next) => {
   const newBook = await Book.create(req.body);
-
   res.status(201).json({
     status: 'success',
     data: {
