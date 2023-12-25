@@ -23,6 +23,10 @@ router
     // authController.protect,
     // authController.restrictTo('admin'),
     bookController.deleteBook
-  );
+);
+  
+router.
+  route('/buy')
+  .patch(bookController.buyBook)
 
 module.exports = router;

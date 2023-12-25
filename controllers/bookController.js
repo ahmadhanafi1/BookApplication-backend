@@ -1,4 +1,5 @@
 const Book = require('../models/bookModel');
+const User = require('../models/userModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -29,8 +30,8 @@ exports.getAllBooks = catchAsync(async (req, res, next) => {
 });
 
 exports.getBook = catchAsync(async (req, res, next) => {
+  
   const book = await Book.findById(req.params.id);
-
 
   if (!book) {
     return next(new AppError('No book found with that ID', 404));
@@ -45,7 +46,7 @@ exports.getBook = catchAsync(async (req, res, next) => {
 });
 
 exports.createBook = catchAsync(async (req, res, next) => {
-  const newBook = await Book.create(req.body);
+  const newBook = await Book.create({...req.body, inStock: (Math.random() * 50).toFixed()});
   res.status(201).json({
     status: 'success',
     data: {
@@ -85,4 +86,30 @@ exports.deleteBook = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.buyBook = catchAsync(async (req, res, next) => {
+  const book = await Book.findById(req.body.book);
+  const user = await User.findOne({email:req.body.email});
+  if (!user) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+  if (!book) {
+    return next(new AppError('No book found with that ID', 404));
+  }
+  if (user.balance < book.price) {
+    return res.status(405).json({
+      status: 'fail',
+      message: "You don't have enough money in your balance to buy this book"
+    })
+  }
+
+  const newBook = await Book.findByIdAndUpdate(req.params.id, {inStock: book.inStock - 1})
+  await User.findOneAndUpdate({email:user.email},{ booksPurchased: [...user.booksPurchased, book.name], balance: (user.balance - book.price)  })
+  res.status(202).json({
+    status: 'success',
+    data: {
+      book: newBook,
+      userBooks: [...user.booksPurchased, book.name]
+    },
+  })
+ })
 

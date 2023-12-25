@@ -39,8 +39,10 @@ const userSchema = new mongoose.Schema({
     }
   },
   balance: {
-
+    type: Number,
+    default: 500,
   },
+  booksPurchased: [String],
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
