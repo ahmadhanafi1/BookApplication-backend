@@ -87,8 +87,10 @@ exports.deleteBook = catchAsync(async (req, res, next) => {
 });
 
 exports.buyBook = catchAsync(async (req, res, next) => {
-  const book = await Book.findById(req.body.book);
-  const user = await User.findOne({email:req.body.email});
+
+  const book = await Book.findOne({name:req.body.book});
+  const user = await User.findOne({ email: req.body.email });
+  console.log("reached here")
   if (!user) {
     return next(new AppError('No user found with that ID', 404));
   }
@@ -102,13 +104,40 @@ exports.buyBook = catchAsync(async (req, res, next) => {
     })
   }
 
-  const newBook = await Book.findByIdAndUpdate(req.params.id, {inStock: book.inStock - 1})
+  const newBook = await Book.findOneAndUpdate({name:req.body.book}, {inStock: book.inStock - 1})
   await User.findOneAndUpdate({email:user.email},{ booksPurchased: [...user.booksPurchased, book.name], balance: (user.balance - book.price)  })
   res.status(202).json({
     status: 'success',
     data: {
       book: newBook,
       userBooks: [...user.booksPurchased, book.name]
+    },
+  })
+ })
+
+ exports.refundBook = catchAsync(async (req, res, next) => {
+  
+  const book = await Book.findOne({name:req.body.book});
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) { return next(new AppError('No user found with that ID', 404)) }
+  if (!book) { return next(new AppError('No book found with that ID', 404)) }
+
+  const indexToRemove = user.booksPurchased.indexOf(req.body.book) 
+  if (indexToRemove === -1) {
+    return res.status(405).json({
+      status: 'fail',
+      message: "You can't refund this book as you didn't buy it"
+    })
+  }
+  user.booksPurchased.splice(indexToRemove, 1)
+  const newBook = await Book.findOneAndUpdate({name:req.body.book}, {inStock: book.inStock + 1})
+  await User.findOneAndUpdate({email:user.email},{ booksPurchased: user.booksPurchased, balance: (user.balance + book.price)})
+  res.status(202).json({
+    status: 'success',
+    data: {
+      book: newBook,
+      userBooks: user.booksPurchased,
     },
   })
  })

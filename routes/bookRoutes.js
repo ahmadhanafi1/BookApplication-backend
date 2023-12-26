@@ -11,6 +11,14 @@ router
   .get(bookController.aliasTopBooks, bookController.getAllBooks);
 
 router
+  .route('/buy')
+  .post(bookController.buyBook)
+
+router
+  .route('/refund')
+  .post(bookController.refundBook)
+
+router
   .route('/')
   .get(authController.protect, bookController.getAllBooks)
   .post(bookController.createBook);
@@ -25,8 +33,6 @@ router
     bookController.deleteBook
 );
   
-router.
-  route('/buy')
-  .patch(bookController.buyBook)
+
 
 module.exports = router;
