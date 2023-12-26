@@ -11,6 +11,14 @@ router
   .get(bookController.aliasTopBooks, bookController.getAllBooks);
 
 router
+  .route('/buy')
+  .post(bookController.buyBook)
+
+router
+  .route('/refund')
+  .post(bookController.refundBook)
+
+router
   .route('/')
   .get(authController.protect, bookController.getAllBooks)
   .post(bookController.createBook);
@@ -23,6 +31,8 @@ router
     // authController.protect,
     // authController.restrictTo('admin'),
     bookController.deleteBook
-  );
+);
+  
+
 
 module.exports = router;

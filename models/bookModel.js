@@ -10,7 +10,11 @@ const bookSchema = new mongoose.Schema({
     unique: true,
     trim: true,
 	},
-	slug: String,
+  slug: String,
+  inStock: {
+    type: Number, 
+    default: 30
+  },
 	author: {
 	  type: String,
 	  required: [true, "A book author must be provided"],
