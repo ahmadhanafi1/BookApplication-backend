@@ -99,8 +99,8 @@ exports.buyBook = catchAsync(async (req, res, next) => {
     })
   }
 
-  const newBook = await Book.findOneAndUpdate({name:req.body.book}, {inStock: book.inStock - 1})
-  await User.findOneAndUpdate({email:user.email},{ booksPurchased: [...user.booksPurchased, book.name], balance: (user.balance - book.price)  })
+  const newBook = await Book.findOneAndUpdate({ name: req.body.book }, { inStock: book.inStock - 1 })
+  await User.findOneAndUpdate({email:user.email},{ booksPurchased: [...user.booksPurchased, {book: book.name, date: new Date()}], balance: (user.balance - book.price)  })
   res.status(202).json({
     status: 'success',
     data: {
@@ -238,7 +238,8 @@ exports.buyCart = catchAsync(async (req, res, next) => {
     const today = new Date()
     return {book: entry.book, date: today}
   }) 
-  const newUser = await User.findOneAndUpdate({ email: user.email }, { cart: [], balance: userBalance - priceToPay, booksPurchased: purchasedBooks }, {new: true})
+
+  const newUser = await User.findOneAndUpdate({ email: user.email }, { cart: [], balance: userBalance - priceToPay, booksPurchased: [...user.booksPurchased, ...purchasedBooks] }, {new: true})
   return res.status(202).json({
     status: 'success',
     data: {
