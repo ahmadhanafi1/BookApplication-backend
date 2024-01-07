@@ -90,13 +90,8 @@ exports.buyBook = catchAsync(async (req, res, next) => {
 
   const book = await Book.findOne({name:req.body.book});
   const user = await User.findOne({ email: req.body.email });
-  console.log("reached here")
-  if (!user) {
-    return next(new AppError('No user found with that ID', 404));
-  }
-  if (!book) {
-    return next(new AppError('No book found with that ID', 404));
-  }
+  if (!user) {return next(new AppError('No user found with that ID', 404));}
+  if (!book) {return next(new AppError('No book found with that ID', 404));}
   if (user.balance < book.price) {
     return res.status(405).json({
       status: 'fail',
@@ -132,7 +127,9 @@ exports.buyBook = catchAsync(async (req, res, next) => {
   }
   user.booksPurchased.splice(indexToRemove, 1)
   const newBook = await Book.findOneAndUpdate({name:req.body.book}, {inStock: book.inStock + 1})
-  await User.findOneAndUpdate({email:user.email},{ booksPurchased: user.booksPurchased, balance: (user.balance + book.price)})
+   await User.findOneAndUpdate({ email: user.email }, {
+      booksPurchased: user.booksPurchased, balance: (user.balance + book.price)
+   })
   res.status(202).json({
     status: 'success',
     data: {
@@ -142,3 +139,110 @@ exports.buyBook = catchAsync(async (req, res, next) => {
   })
  })
 
+exports.addToCart = catchAsync(async (req, res, next) => { 
+  const book = await Book.findOne({name:req.body.book});
+  const user = await User.findOne({ email: req.body.email });
+  
+  if (!user) { return next(new AppError('No user found with that ID', 404)) }
+  if (!book) { return next(new AppError('No book found with that ID', 404)) }
+  if (book.inStock < 1) { return next(new AppError('Book is out of stock', 400)) }
+  
+  const newBook = await Book.findOneAndUpdate({ name: req.body.book }, { inStock: book.inStock - 1 })
+  const inCart = { bookId: book.id, book: book.name, quantity: 1, price: book.price, imageCover: book.imageCover }
+  const bookExists = user.cart.some(entry => entry.bookId === book.id)
+  let newUser
+  if (bookExists) {
+    const newCart = user.cart.map((entry) => {return entry.bookId === inCart.bookId ? { ...entry._doc, quantity: entry._doc.quantity + 1 }: entry})
+    newUser = await User.findOneAndUpdate({ email: user.email }, { cart: newCart }, { new: true })
+    if (newUser) {
+        return res.status(202).json({
+          status: 'success',
+          data: {
+            book: newBook,
+            userCart: newCart,
+          },
+        }) 
+    }
+  } else {
+    newUser = await User.findOneAndUpdate({ email: user.email }, { cart: [...user.cart, inCart] }, {new: true})
+    if (newUser) {
+
+      return res.status(202).json({
+        status: 'success',
+        data: {
+          book: newBook,
+          userCart: newUser.cart,
+        },
+      }) 
+    }
+  }
+
+  res.status(500).json({
+    status: 'fail',
+    data: {
+      message: "fail: internal system error.",
+    },
+  }) 
+})
+
+exports.removeFromCart = catchAsync(async (req, res, next) => {
+  
+  const book = await Book.findOne({name:req.body.book});
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) { return next(new AppError('No user found with that ID', 404)) }
+  if (!book) { return next(new AppError('No book found with that ID', 404)) }
+
+  const newBook = await Book.findOneAndUpdate({ name: req.body.book }, { inStock: book.inStock + 1 })
+
+  const bookToRemove = user.cart.filter(entry => entry?.bookId === book.id)
+  console.log(bookToRemove)
+  if (!bookToRemove[0]?.bookId) { return next(new AppError('Book does not exist in cart', 400)) }
+  let newCart
+  let newUser
+  if (bookToRemove[0].quantity > 1) {
+    newCart = user.cart.map((entry) => entry.bookId === book.id ? { ...entry._doc, quantity: entry._doc.quantity + -1 }: entry)
+    newUser = await User.findOneAndUpdate({ email: user.email }, { cart: newCart }, { new: true })
+    if (newUser) {
+        return res.status(202).json({
+          status: 'success',
+          data: {
+            book: newBook,
+            userCart: newCart,
+          },
+        }) 
+    }
+  } else {
+    newCart = user.cart.filter(entry => entry.bookId !== book.id)
+    newUser = await User.findOneAndUpdate({ email: user.email }, { cart: newCart }, { new: true })
+    if (newUser) {
+        return res.status(202).json({
+          status: 'success',
+          data: {
+            book: newBook,
+            userCart: newCart,
+          },
+        }) 
+    }
+  }
+})
+
+exports.buyCart = catchAsync(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) { return next(new AppError('No user found with that ID', 404)) }
+  const userBalance = user.balance
+  let priceToPay = 0
+  user.cart.forEach(entry => {priceToPay += entry.price * entry.quantity })
+  if (userBalance < priceToPay) return next(new AppError("You don't have enough money in your balance to buy all the items selected", 400))  
+
+  const purchasedBooks = user.cart.map(entry => {
+    const today = new Date()
+    return {book: entry.book, date: today}
+  }) 
+  const newUser = await User.findOneAndUpdate({ email: user.email }, { cart: [], balance: userBalance - priceToPay, booksPurchased: purchasedBooks }, {new: true})
+  return res.status(202).json({
+    status: 'success',
+    data: {
+      user: newUser,
+    },
+  })  
+}) 

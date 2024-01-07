@@ -15,6 +15,18 @@ router
   .post(bookController.buyBook)
 
 router
+  .route('/addToCart')
+  .post(bookController.addToCart)
+
+router
+  .route('/removeFromCart')
+  .post(bookController.removeFromCart)
+
+router
+  .route("/buyCart")
+  .post(bookController.buyCart)
+
+router
   .route('/refund')
   .post(bookController.refundBook)
 

@@ -42,7 +42,17 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 500,
   },
-  booksPurchased: [String],
+  booksPurchased: [{book: String, date: Date}],
+  cart: {
+    type: [{
+      bookId: {type: String},
+      book: {type: String},
+      quantity: {type:Number},
+      price: {type:Number},
+      imageCover: {type: String},
+    }],
+    default: [],
+  },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
