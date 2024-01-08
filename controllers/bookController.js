@@ -87,7 +87,7 @@ exports.deleteBook = catchAsync(async (req, res, next) => {
 });
 
 exports.buyBook = catchAsync(async (req, res, next) => {
-
+  console.log(req.body)
   const book = await Book.findOne({name:req.body.book});
   const user = await User.findOne({ email: req.body.email });
   if (!user) {return next(new AppError('No user found with that ID', 404));}
@@ -105,7 +105,7 @@ exports.buyBook = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       book: newBook,
-      userBooks: [...user.booksPurchased, book.name]
+      userBooks: [...user.booksPurchased, {book: book.name, date: new Date()}]
     },
   })
  })
